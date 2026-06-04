@@ -318,7 +318,7 @@ npm run migrate
 psql -h localhost -U postgres -d tradfi_web3 -c "GRANT SELECT, UPDATE ON outbox TO ledger_writer;"
 
 # Start a local Ethereum node (choose one)
-anvil
+anvil --fork-url [ETHEREUM MAINNET URL VIA ALCHEMY/INFURA/ETC] --chain-id 1337 --balance 1000000 --accounts 6 --host 0.0.0.0 --port 8545
 
 # Start the application
 npm run dev
