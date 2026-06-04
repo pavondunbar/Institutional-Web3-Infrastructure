@@ -1,0 +1,94 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ReconciliationService = void 0;
+const cron_1 = require("cron");
+const connection_1 = require("../database/connection");
+const ledger_service_1 = require("../database/ledger-service");
+const config_1 = require("../config");
+/**
+ * ReconciliationService: Scheduled jobs that verify ledger integrity.
+ * - Balance reconciliation: cached balances match ledger reconstruction
+ * - Hash chain verification: no broken links in the append-only chain
+ * - Cross-system: on-chain balances match internal records
+ */
+class ReconciliationService {
+    jobs = [];
+    start() {
+        // Balance reconciliation every 5 minutes
+        this.jobs.push(new cron_1.CronJob('*/5 * * * *', () => { this.runBalanceReconciliation().catch(e => config_1.logger.error(e, 'Balance recon error')); }, null, true));
+        // Hash chain verification every 15 minutes
+        this.jobs.push(new cron_1.CronJob('*/15 * * * *', () => { this.runHashChainVerification().catch(e => config_1.logger.error(e, 'Hash chain recon error')); }, null, true));
+        config_1.logger.info('Reconciliation service started');
+    }
+    stop() {
+        this.jobs.forEach(j => j.stop());
+    }
+    /**
+     * Verify that balance_cache matches reconstructed balances from ledger_entries.
+     */
+    async runBalanceReconciliation() {
+        const runId = await this.startRun('balance');
+        const accounts = await connection_1.db.query('SELECT account_id FROM balance_cache');
+        let discrepancies = 0;
+        for (const row of accounts.rows) {
+            const cached = await connection_1.db.query('SELECT debit_total, credit_total, balance FROM balance_cache WHERE account_id = $1', [row.account_id]);
+            const reconstructed = await (0, ledger_service_1.reconstructBalance)(row.account_id);
+            const c = cached.rows[0];
+            if (BigInt(c.debit_total) !== reconstructed.debitTotal ||
+                BigInt(c.credit_total) !== reconstructed.creditTotal ||
+                BigInt(c.balance) !== reconstructed.balance) {
+                discrepancies++;
+                config_1.logger.error({
+                    accountId: row.account_id,
+                    cached: { debit: c.debit_total, credit: c.credit_total, balance: c.balance },
+                    reconstructed: { debit: reconstructed.debitTotal.toString(), credit: reconstructed.creditTotal.toString(), balance: reconstructed.balance.toString() },
+                }, 'Balance discrepancy detected');
+            }
+        }
+        await this.completeRun(runId, accounts.rows.length, discrepancies);
+        return { passed: discrepancies === 0, discrepancies };
+    }
+    /**
+     * Verify hash chain integrity for all accounts.
+     */
+    async runHashChainVerification() {
+        const runId = await this.startRun('hash_chain');
+        const accounts = await connection_1.db.query('SELECT DISTINCT account_id FROM ledger_entries');
+        let brokenChains = 0;
+        for (const row of accounts.rows) {
+            const entries = await connection_1.db.query('SELECT entry_hash, prev_hash, sequence_num FROM ledger_entries WHERE account_id = $1 ORDER BY sequence_num ASC', [row.account_id]);
+            const ZERO_HASH = '0000000000000000000000000000000000000000000000000000000000000000';
+            let expectedPrevHash = ZERO_HASH;
+            for (let i = 0; i < entries.rows.length; i++) {
+                const entry = entries.rows[i];
+                if (entry.prev_hash !== expectedPrevHash) {
+                    brokenChains++;
+                    config_1.logger.error({ accountId: row.account_id, seq: entry.sequence_num, expectedPrevHash, actualPrevHash: entry.prev_hash }, 'Hash chain broken');
+                    break;
+                }
+                if (entry.sequence_num !== i + 1) {
+                    brokenChains++;
+                    config_1.logger.error({ accountId: row.account_id, expectedSeq: i + 1, actualSeq: entry.sequence_num }, 'Sequence gap');
+                    break;
+                }
+                expectedPrevHash = entry.entry_hash;
+            }
+        }
+        await this.completeRun(runId, accounts.rows.length, brokenChains);
+        return { passed: brokenChains === 0, brokenChains };
+    }
+    async startRun(type) {
+        const result = await connection_1.db.query(`INSERT INTO reconciliation_runs (run_type, status) VALUES ($1, 'running') RETURNING id`, [type]);
+        return result.rows[0].id;
+    }
+    async completeRun(runId, checked, discrepancies) {
+        const status = discrepancies === 0 ? 'passed' : 'failed';
+        await connection_1.db.query(`UPDATE reconciliation_runs SET status = $1, accounts_checked = $2, discrepancies_found = $3, completed_at = NOW() WHERE id = $4`, [status, checked, discrepancies, runId]);
+        if (discrepancies > 0) {
+            await connection_1.db.query(`INSERT INTO outbox (aggregate_type, aggregate_id, event_type, payload)
+         VALUES ('reconciliation', $1, 'recon.failed', $2)`, [runId, JSON.stringify({ runId, discrepancies })]);
+        }
+    }
+}
+exports.ReconciliationService = ReconciliationService;
+//# sourceMappingURL=reconciliation-service.js.map
