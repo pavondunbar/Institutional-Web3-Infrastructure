@@ -247,6 +247,13 @@ REST endpoints for:
 
 ## API Reference
 
+### Accounts
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/v1/accounts` | List all accounts (paginated: `?limit=50&offset=0`) |
+| `POST` | `/api/v1/accounts` | Create an account (requires `externalId`, `accountType`, `currency`) |
+
 ### Ledger
 
 | Method | Path | Description |
@@ -335,6 +342,25 @@ curl http://localhost:3000/health
 ```
 
 ## Usage
+
+### Create an Account
+
+```bash
+curl -X POST http://localhost:3000/api/v1/accounts \
+  -H "Content-Type: application/json" \
+  -d '{
+    "externalId": "client-assets-001",
+    "accountType": "asset",
+    "currency": "USD",
+    "metadata": {"department": "treasury"}
+  }'
+```
+
+### List Accounts
+
+```bash
+curl http://localhost:3000/api/v1/accounts?limit=50&offset=0
+```
 
 ### Post a Journal Entry (Double-Entry Transfer)
 

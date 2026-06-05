@@ -32,6 +32,46 @@ export function createApp() {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
+  // ======================== ACCOUNTS ========================
+  app.get('/api/v1/accounts', async (req: Request, res: Response) => {
+    try {
+      const limit = Math.min(parseInt(String(req.query.limit) || '50'), 200);
+      const offset = parseInt(String(req.query.offset) || '0');
+      const result = await db.query(
+        'SELECT * FROM accounts ORDER BY created_at DESC LIMIT $1 OFFSET $2',
+        [limit, offset]
+      );
+      res.json({ accounts: result.rows, limit, offset });
+    } catch (err: unknown) {
+      res.status(500).json({ error: 'Internal error' });
+    }
+  });
+
+  app.post('/api/v1/accounts', async (req: Request, res: Response) => {
+    try {
+      const { externalId, accountType, currency, metadata } = req.body;
+      if (!externalId || !accountType || !currency) {
+        return res.status(400).json({ error: 'externalId, accountType, and currency are required' });
+      }
+      const validTypes = ['asset', 'liability', 'equity', 'revenue', 'expense'];
+      if (!validTypes.includes(accountType)) {
+        return res.status(400).json({ error: `accountType must be one of: ${validTypes.join(', ')}` });
+      }
+      const result = await db.query(
+        `INSERT INTO accounts (external_id, account_type, currency, metadata)
+         VALUES ($1, $2, $3, $4) RETURNING *`,
+        [externalId, accountType, currency, JSON.stringify(metadata || {})]
+      );
+      res.status(201).json(result.rows[0]);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
+      if (msg.includes('duplicate key')) {
+        return res.status(409).json({ error: 'Account with this externalId already exists' });
+      }
+      res.status(400).json({ error: msg });
+    }
+  });
+
   // ======================== LEDGER ========================
   app.post('/api/v1/journal', async (req: Request, res: Response) => {
     try {
