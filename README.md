@@ -379,6 +379,9 @@ Alert rules, anomaly detection (z-score), fraud detection, SIEM export.
 
 ## API Reference
 
+> **Base URL:** `http://localhost:3000`
+> Replace `:id`, `:keyId`, `:hash`, and `:pair` with actual values. Total: **55 endpoints**.
+
 ### Core APIs
 
 | Method | Path | Description |
@@ -398,6 +401,37 @@ Alert rules, anomaly detection (z-score), fraud detection, SIEM export.
 | `POST` | `/api/v1/chain/estimate-gas` | Gas estimation |
 | `GET` | `/api/v1/blocks` | List indexed blocks |
 | `GET` | `/api/v1/events` | Query indexed events |
+
+#### Core API curl Commands
+
+```bash
+# Health & Metrics
+curl http://localhost:3000/health
+curl http://localhost:3000/metrics
+
+# Accounts
+curl http://localhost:3000/api/v1/accounts
+curl -X POST http://localhost:3000/api/v1/accounts -H "Content-Type: application/json" -d '{}'
+curl http://localhost:3000/api/v1/accounts/:id/balance
+curl http://localhost:3000/api/v1/accounts/:id/history
+
+# Ledger
+curl -X POST http://localhost:3000/api/v1/journal -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/journal/:id/reverse
+
+# Wallets
+curl -X POST http://localhost:3000/api/v1/wallets -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/wallets/:id/transactions -H "Content-Type: application/json" -d '{}'
+
+# Chain
+curl http://localhost:3000/api/v1/chain/state
+curl http://localhost:3000/api/v1/chain/tx/:hash
+curl -X POST http://localhost:3000/api/v1/chain/estimate-gas -H "Content-Type: application/json" -d '{}'
+
+# Indexer
+curl http://localhost:3000/api/v1/blocks
+curl http://localhost:3000/api/v1/events
+```
 
 ### Institutional APIs (`/api/v1/institutional/`)
 
@@ -444,6 +478,80 @@ Alert rules, anomaly detection (z-score), fraud detection, SIEM export.
 | `GET` | `/infrastructure/capacity` | Capacity metrics |
 | `POST` | `/infrastructure/failover` | Geographic failover |
 
+#### Institutional API curl Commands
+
+```bash
+# Key Management
+curl -X POST http://localhost:3000/api/v1/institutional/keys -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/keys/:keyId/rotate -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/keys/:keyId/sign -H "Content-Type: application/json" -d '{}'
+
+# Settlement
+curl -X POST http://localhost:3000/api/v1/institutional/settlements -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/settlements/:id/execute -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/settlements/netting -H "Content-Type: application/json" -d '{}'
+
+# Lending
+curl -X POST http://localhost:3000/api/v1/institutional/lending/loans -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/lending/loans/:id/repay -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/lending/loans/:id/liquidate -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/lending/monitor -H "Content-Type: application/json" -d '{}'
+
+# FX
+curl -X POST http://localhost:3000/api/v1/institutional/fx/rates -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/fx/quote -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/fx/conversions/:id/execute -H "Content-Type: application/json" -d '{}'
+
+# Price Oracle
+curl -X POST http://localhost:3000/api/v1/institutional/oracle/quotes -H "Content-Type: application/json" -d '{}'
+curl http://localhost:3000/api/v1/institutional/oracle/prices/:pair
+
+# Treasury
+curl -X POST http://localhost:3000/api/v1/institutional/treasury/portfolios -H "Content-Type: application/json" -d '{}'
+curl http://localhost:3000/api/v1/institutional/treasury/portfolios/:id/nav
+curl http://localhost:3000/api/v1/institutional/treasury/portfolios/:id/proof-of-reserves
+
+# Monitoring
+curl -X POST http://localhost:3000/api/v1/institutional/monitoring/rules -H "Content-Type: application/json" -d '{}'
+curl http://localhost:3000/api/v1/institutional/monitoring/alerts
+curl http://localhost:3000/api/v1/institutional/monitoring/siem-export
+
+# Governance
+curl -X POST http://localhost:3000/api/v1/institutional/governance/policies -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/governance/requests -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/governance/requests/:id/approve -H "Content-Type: application/json" -d '{}'
+
+# Compliance
+curl -X POST http://localhost:3000/api/v1/institutional/compliance/screen -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/compliance/travel-rule -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/compliance/sar -H "Content-Type: application/json" -d '{}'
+
+# Risk
+curl -X POST http://localhost:3000/api/v1/institutional/risk/check -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/risk/kill-switch -H "Content-Type: application/json" -d '{}'
+
+# Dead Letter Queue
+curl http://localhost:3000/api/v1/institutional/dlq/stats
+curl http://localhost:3000/api/v1/institutional/dlq/entries
+curl -X POST http://localhost:3000/api/v1/institutional/dlq/:id/reprocess
+
+# Trust Domains
+curl -X POST http://localhost:3000/api/v1/institutional/trust-domains -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/trust-domains/authorize -H "Content-Type: application/json" -d '{}'
+
+# Vendors
+curl -X POST http://localhost:3000/api/v1/institutional/vendors -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/vendors/:id/assessments -H "Content-Type: application/json" -d '{}'
+
+# Privacy
+curl -X POST http://localhost:3000/api/v1/institutional/privacy/zk-proof/balance -H "Content-Type: application/json" -d '{}'
+
+# Infrastructure
+curl -X POST http://localhost:3000/api/v1/institutional/infrastructure/nodes -H "Content-Type: application/json" -d '{}'
+curl http://localhost:3000/api/v1/institutional/infrastructure/capacity
+curl -X POST http://localhost:3000/api/v1/institutional/infrastructure/failover -H "Content-Type: application/json" -d '{}'
+```
+
 ### Tokenization APIs
 
 | Method | Path | Description |
@@ -455,6 +563,18 @@ Alert rules, anomaly detection (z-score), fraud detection, SIEM export.
 | `GET` | `/api/v1/tokens/:id/holders` | Cap table |
 | `POST` | `/api/v1/tokens/:id/restrictions` | Add transfer restriction |
 | `POST` | `/api/v1/tokens/:id/actions` | Create corporate action |
+
+#### Tokenization API curl Commands
+
+```bash
+curl -X POST http://localhost:3000/api/v1/tokens -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/tokens/:id/mint -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/tokens/:id/burn -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/tokens/:id/transfer -H "Content-Type: application/json" -d '{}'
+curl http://localhost:3000/api/v1/tokens/:id/holders
+curl -X POST http://localhost:3000/api/v1/tokens/:id/restrictions -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/tokens/:id/actions -H "Content-Type: application/json" -d '{}'
+```
 
 ## Installation
 
