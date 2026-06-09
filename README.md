@@ -34,7 +34,7 @@ Enterprise-grade blockchain infrastructure layer providing a custody-grade doubl
 | Messaging | Apache Kafka via transactional outbox pattern + Dead Letter Queue |
 | Blockchain | Ethereum L1 (ethers.js v6) |
 | API | Express REST + Prometheus /metrics |
-| Testing | Jest + ts-jest (39 tests) |
+| Testing | Jest + ts-jest (64 tests across 4 suites) |
 | Infrastructure | Docker Compose (Postgres, Redis, Kafka, Zookeeper) |
 | Monitoring | Prometheus-compatible metrics export, anomaly detection, SIEM integration |
 
@@ -183,6 +183,102 @@ This system implements the **core backend infrastructure** of a digital-asset cu
 - **Field-level encryption** — AES-256-GCM for sensitive data at rest
 - **Automated reconciliation** — balance + hash chain verification every 5/15 minutes
 
+### 18. Crypto Custody
+
+- **Multi-signature policies** — configurable M-of-N signing with per-wallet-type rules
+- **Withdrawal whitelist** — address approval workflow with maker-checker
+- **Cold storage transfers** — multi-party signing with cooldown enforcement
+- **Address verification** — whitelisted destinations only for outgoing transfers
+
+### 19. CCP Clearinghouse
+
+- **Clearing membership** — onboarding, position limits, exposure tracking
+- **Margin management** — initial and variation margin posting and monitoring
+- **Default waterfall** — defaulter margin → defaulter fund → CCP skin-in-game → surviving fund → assessment
+- **Stress testing** — scenario-based fund adequacy analysis
+
+### 20. DvP Settlement Extensions
+
+- **Partial settlement** — settle available percentage, create residual instruction
+- **Buy-in procedures** — automated failure handling with penalty enforcement
+- **Settlement failure tracking** — deadline monitoring and buy-in execution
+
+### 21. Lending Extensions
+
+- **Haircut schedules** — per-asset collateral valuation discounts by volatility tier
+- **Multi-asset collateral baskets** — composite collateral with effective value calculation
+- **Partial liquidation** — proportional liquidation to restore LTV
+- **Interest rate curves** — tenor-based curves with linear/cubic interpolation
+- **Loan syndication** — multi-lender participation with share allocation
+
+### 22. Stablecoin Infrastructure
+
+- **Mint/redeem** — collateral-backed issuance and redemption with fee calculation
+- **Peg monitoring** — deviation tracking with basis point precision
+- **Reserve ratio enforcement** — minimum 100% backing requirement
+- **Yield distribution** — periodic yield allocation to holders
+
+### 23. Permissioned DeFi
+
+- **Verifiable credentials** — issuance, verification, and revocation of KYC/accreditation credentials
+- **Pool access policies** — credential-gated DeFi pool participation
+- **Credential expiry** — automatic invalidation after configurable validity period
+
+### 24. Onchain Compliance
+
+- **Transaction graph analysis** — multi-hop address risk scoring
+- **Jurisdiction rules** — per-jurisdiction thresholds with block/flag/report/approval actions
+- **Regulatory reporting** — CTR, SAR, STR, threshold, and periodic report generation
+
+### 25. Bitcoin ETF Infrastructure
+
+- **UTXO management** — registration, coin selection, and confirmation tracking
+- **Creation/redemption baskets** — AP-initiated basket workflow with approval gates
+- **Intraday NAV (iNAV)** — real-time fund valuation with premium/discount calculation
+- **Fund reconciliation** — UTXO-to-shares accounting verification
+
+### 26. Digital Bonds
+
+- **Bond terms** — face value, coupon rate, frequency, day-count conventions, call/put provisions
+- **Coupon schedule generation** — automated payment date calculation
+- **Accrued interest** — clean price / dirty price with day-count computation
+- **Credit events** — downgrade, default, restructuring, cross-default recording
+
+### 27. Tokenized Fund NAV
+
+- **Subscription/redemption windows** — scheduled open/close with NAV strike
+- **Order management** — investor order submission and settlement
+- **Performance fees** — high-water-mark and hurdle-rate calculation
+- **Investor statements** — per-investor position and P&L reporting
+
+### 28. Unbanked/Underbanked Infrastructure
+
+- **Tiered KYC** — progressive access levels (phone → ID → address → full KYC)
+- **Remittance corridors** — cross-border transfer with fee and FX markup
+- **USSD interface** — text-based balance queries for feature phones
+- **Transaction limits** — tier-based daily/monthly/single transaction caps
+
+### 29. Disaster Recovery
+
+- **Backup management** — full, incremental, and WAL archive backups with encryption
+- **Point-in-time restore** — timestamp or WAL-position targeted recovery
+- **Restore verification** — hash chain validation, balance reconciliation, row count matching
+- **RPO/RTO tracking** — recovery point and recovery time objective monitoring
+
+### 30. Zero-Trust Security
+
+- **Mutual TLS (mTLS)** — certificate-based service authentication
+- **Request signing** — HMAC-based tamper detection with replay protection
+- **IP allowlist** — CIDR and exact-IP enforcement with deny list
+- **Service identity** — per-service signing keys with endpoint restrictions
+
+### 31. Key Ceremony Service
+
+- **Multi-participant orchestration** — initiator, custodians, witnesses, auditors
+- **Step-by-step procedures** — evidence collection at each ceremony step
+- **Quorum enforcement** — minimum custodians and witnesses required
+- **Attestation signing** — all participants attest to ceremony integrity
+
 ## Architecture
 
 ```
@@ -258,6 +354,51 @@ Prometheus-compatible `/metrics` endpoint with 15+ metric types.
 
 ### Monitoring Service (`src/monitoring/monitoring-service.ts`)
 Alert rules, anomaly detection (z-score), fraud detection, SIEM export.
+
+### Crypto Custody Service (`src/custody/crypto-custody-service.ts`)
+Multi-signature policies, withdrawal whitelist management, cold storage transfer orchestration.
+
+### DvP Settlement Extensions (`src/settlement/dvp-settlement-service.ts`)
+Partial settlement execution, buy-in procedures, settlement failure tracking.
+
+### CCP Clearinghouse (`src/clearing/ccp-clearinghouse-service.ts`)
+Clearing membership, margin management, default waterfall execution, stress testing.
+
+### Lending Extensions (`src/lending/lending-extensions-service.ts`)
+Haircut schedules, multi-asset collateral baskets, partial liquidation, interest rate curves, loan syndication.
+
+### Stablecoin Service (`src/stablecoin/stablecoin-service.ts`)
+Mint/redeem operations, peg monitoring, reserve ratio enforcement, yield distribution.
+
+### Permissioned DeFi (`src/defi/permissioned-defi-service.ts`)
+Verifiable credential issuance/verification/revocation, pool access policies.
+
+### Onchain Compliance (`src/compliance/onchain-compliance-service.ts`)
+Transaction graph analysis, jurisdiction rules, regulatory report generation.
+
+### Bitcoin ETF Service (`src/etf/bitcoin-etf-service.ts`)
+UTXO management, creation/redemption baskets, intraday NAV calculation, fund reconciliation.
+
+### Digital Bond Service (`src/bond/digital-bond-service.ts`)
+Bond terms, coupon schedule generation, accrued interest calculation, credit event recording.
+
+### Tokenized Fund NAV (`src/fund/tokenized-fund-service.ts`)
+Subscription/redemption windows, order management, performance fees, investor statements.
+
+### RWA Tokenization (`src/rwa/rwa-tokenization-service.ts`)
+Investor accreditation, asset verification, eligibility checks.
+
+### Unbanked Infrastructure (`src/unbanked/unbanked-infra-service.ts`)
+Tiered KYC profiles, remittance corridors, USSD balance queries.
+
+### Disaster Recovery (`src/disaster-recovery/disaster-recovery-service.ts`)
+Backup management, point-in-time restore, restore verification, RPO/RTO monitoring.
+
+### Zero-Trust Security (`src/security/zero-trust.ts`)
+Mutual TLS validation, HMAC request signing, IP allowlist, service identity verification.
+
+### Key Ceremony Service (`src/key-management/key-ceremony-service.ts`)
+Multi-participant ceremony orchestration, step-by-step procedures, quorum enforcement, attestation.
 
 ## Institutional Controls
 
@@ -380,7 +521,7 @@ Alert rules, anomaly detection (z-score), fraud detection, SIEM export.
 ## API Reference
 
 > **Base URL:** `http://localhost:3000`
-> Replace `:id`, `:keyId`, `:hash`, `:pair`, `:number`, `:name`, `:accountId`, `:address`, `:tokenId`, and `:restrictionId` with actual values. Total: **91 endpoints**.
+> Replace `:id`, `:keyId`, `:hash`, `:pair`, `:number`, `:name`, `:accountId`, `:address`, `:tokenId`, and `:restrictionId` with actual values. Total: **183 endpoints**.
 
 ### Auth / IAM APIs (`/api/v1/auth/`)
 
@@ -748,6 +889,218 @@ curl http://localhost:3000/api/v1/institutional/dlq/entries
 curl -X POST http://localhost:3000/api/v1/institutional/dlq/:id/reprocess
 ```
 
+### Crypto Custody APIs (`/api/v1/institutional/custody/`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/multisig-policies` | Create multi-signature policy |
+| `POST` | `/whitelist` | Add address to withdrawal whitelist |
+| `POST` | `/whitelist/:id/approve` | Approve whitelist entry |
+| `POST` | `/cold-storage/transfers` | Initiate cold storage transfer |
+| `POST` | `/cold-storage/transfers/:id/sign` | Sign cold storage transfer |
+
+### RWA Tokenization APIs (`/api/v1/institutional/rwa/`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/accreditations` | Submit investor accreditation |
+| `POST` | `/accreditations/:id/verify` | Verify accreditation |
+| `GET` | `/eligibility/:investorId/:assetId` | Check investor eligibility |
+| `POST` | `/verifications` | Submit asset verification |
+
+### DvP Settlement Extension APIs (`/api/v1/institutional/settlements/`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/:id/partial` | Execute partial settlement |
+| `POST` | `/:id/buy-in` | Initiate buy-in procedure |
+| `POST` | `/buy-ins/:id/execute` | Execute buy-in |
+
+### CCP Clearinghouse APIs (`/api/v1/institutional/clearing/`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/members` | Onboard clearing member |
+| `POST` | `/members/:id/margin` | Post margin |
+| `POST` | `/members/:id/check-limit` | Check position limit |
+| `POST` | `/default-waterfall/:id` | Execute default waterfall |
+| `POST` | `/stress-test` | Run stress test |
+
+### Lending Extension APIs (`/api/v1/institutional/lending/`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/haircuts` | Get haircut schedules |
+| `POST` | `/haircuts` | Set haircut for asset |
+| `POST` | `/loans/:id/collateral` | Add collateral to basket |
+| `POST` | `/loans/:id/partial-liquidate` | Execute partial liquidation |
+| `POST` | `/rate-curves` | Set interest rate curve |
+| `POST` | `/syndications` | Create syndicated loan |
+
+### Stablecoin APIs (`/api/v1/institutional/stablecoin/`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/mint` | Request stablecoin mint |
+| `POST` | `/redeem` | Request redemption |
+| `POST` | `/operations/:id/process` | Process mint/redeem operation |
+| `GET` | `/peg` | Get peg status |
+| `POST` | `/peg/update` | Update peg price |
+| `POST` | `/yield/distribute` | Distribute yield to holders |
+
+### Permissioned DeFi APIs (`/api/v1/institutional/defi/`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/credentials` | Issue verifiable credential |
+| `GET` | `/credentials/:id/verify` | Verify credential |
+| `POST` | `/credentials/:id/revoke` | Revoke credential |
+| `POST` | `/pools/policies` | Create pool access policy |
+| `GET` | `/pools/:poolId/access/:holderId` | Check pool access |
+
+### Onchain Compliance APIs (`/api/v1/institutional/compliance/`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/graph-analysis` | Analyze transaction graph |
+| `POST` | `/jurisdiction-rules` | Set jurisdiction rule |
+| `POST` | `/jurisdiction-check` | Evaluate jurisdiction rules |
+| `POST` | `/reports` | Generate regulatory report |
+| `GET` | `/reports` | List regulatory reports |
+
+### Tokenized Fund NAV APIs (`/api/v1/institutional/funds/`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/windows` | Create subscription/redemption window |
+| `POST` | `/orders` | Submit fund order |
+| `POST` | `/windows/:id/settle` | Settle window with NAV |
+| `POST` | `/performance-fee` | Calculate performance fee |
+| `GET` | `/:fundId/statements/:investorId` | Get investor statement |
+
+### Digital Bond APIs (`/api/v1/institutional/bonds/`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/terms` | Create bond terms |
+| `POST` | `/:bondId/coupons/generate` | Generate coupon schedule |
+| `POST` | `/accrued-interest` | Calculate accrued interest |
+| `GET` | `/:bondId/call-provision` | Evaluate call provision |
+| `POST` | `/:bondId/credit-event` | Record credit event |
+
+### Bitcoin ETF APIs (`/api/v1/institutional/etf/`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/utxos` | Register UTXO |
+| `GET` | `/utxos` | Get UTXO set |
+| `POST` | `/baskets/creation` | Submit creation basket |
+| `POST` | `/baskets/redemption` | Submit redemption basket |
+| `POST` | `/baskets/:id/approve` | Approve basket |
+| `POST` | `/baskets/:id/settle` | Settle basket |
+| `POST` | `/inav` | Calculate intraday NAV |
+| `POST` | `/reconcile` | Reconcile fund accounting |
+
+### Unbanked/Underbanked APIs (`/api/v1/institutional/unbanked/`)
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/profiles` | Create tiered KYC profile |
+| `POST` | `/verify` | Submit verification |
+| `POST` | `/corridors` | Create remittance corridor |
+| `POST` | `/remittances` | Initiate remittance transfer |
+| `GET` | `/balance/:userId` | Get balance (USSD text format) |
+
+#### New API curl Commands
+
+```bash
+# Crypto Custody
+curl -X POST http://localhost:3000/api/v1/institutional/custody/multisig-policies -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/custody/whitelist -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/custody/whitelist/:id/approve -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/custody/cold-storage/transfers -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/custody/cold-storage/transfers/:id/sign -H "Content-Type: application/json" -d '{}'
+
+# RWA Tokenization
+curl -X POST http://localhost:3000/api/v1/institutional/rwa/accreditations -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/rwa/accreditations/:id/verify -H "Content-Type: application/json" -d '{}'
+curl http://localhost:3000/api/v1/institutional/rwa/eligibility/:investorId/:assetId
+curl -X POST http://localhost:3000/api/v1/institutional/rwa/verifications -H "Content-Type: application/json" -d '{}'
+
+# DvP Settlement Extensions
+curl -X POST http://localhost:3000/api/v1/institutional/settlements/:id/partial -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/settlements/:id/buy-in -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/settlements/buy-ins/:id/execute -H "Content-Type: application/json" -d '{}'
+
+# CCP Clearinghouse
+curl -X POST http://localhost:3000/api/v1/institutional/clearing/members -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/clearing/members/:id/margin -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/clearing/members/:id/check-limit -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/clearing/default-waterfall/:id -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/clearing/stress-test -H "Content-Type: application/json" -d '{}'
+
+# Lending Extensions
+curl http://localhost:3000/api/v1/institutional/lending/haircuts
+curl -X POST http://localhost:3000/api/v1/institutional/lending/haircuts -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/lending/loans/:id/collateral -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/lending/loans/:id/partial-liquidate -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/lending/rate-curves -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/lending/syndications -H "Content-Type: application/json" -d '{}'
+
+# Stablecoin
+curl -X POST http://localhost:3000/api/v1/institutional/stablecoin/mint -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/stablecoin/redeem -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/stablecoin/operations/:id/process -H "Content-Type: application/json" -d '{}'
+curl http://localhost:3000/api/v1/institutional/stablecoin/peg
+curl -X POST http://localhost:3000/api/v1/institutional/stablecoin/peg/update -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/stablecoin/yield/distribute -H "Content-Type: application/json" -d '{}'
+
+# Permissioned DeFi
+curl -X POST http://localhost:3000/api/v1/institutional/defi/credentials -H "Content-Type: application/json" -d '{}'
+curl http://localhost:3000/api/v1/institutional/defi/credentials/:id/verify
+curl -X POST http://localhost:3000/api/v1/institutional/defi/credentials/:id/revoke -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/defi/pools/policies -H "Content-Type: application/json" -d '{}'
+curl http://localhost:3000/api/v1/institutional/defi/pools/:poolId/access/:holderId
+
+# Onchain Compliance
+curl -X POST http://localhost:3000/api/v1/institutional/compliance/graph-analysis -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/compliance/jurisdiction-rules -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/compliance/jurisdiction-check -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/compliance/reports -H "Content-Type: application/json" -d '{}'
+curl http://localhost:3000/api/v1/institutional/compliance/reports
+
+# Tokenized Fund NAV
+curl -X POST http://localhost:3000/api/v1/institutional/funds/windows -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/funds/orders -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/funds/windows/:id/settle -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/funds/performance-fee -H "Content-Type: application/json" -d '{}'
+curl http://localhost:3000/api/v1/institutional/funds/:fundId/statements/:investorId
+
+# Digital Bonds
+curl -X POST http://localhost:3000/api/v1/institutional/bonds/terms -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/bonds/:bondId/coupons/generate -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/bonds/accrued-interest -H "Content-Type: application/json" -d '{}'
+curl http://localhost:3000/api/v1/institutional/bonds/:bondId/call-provision
+curl -X POST http://localhost:3000/api/v1/institutional/bonds/:bondId/credit-event -H "Content-Type: application/json" -d '{}'
+
+# Bitcoin ETF
+curl -X POST http://localhost:3000/api/v1/institutional/etf/utxos -H "Content-Type: application/json" -d '{}'
+curl http://localhost:3000/api/v1/institutional/etf/utxos
+curl -X POST http://localhost:3000/api/v1/institutional/etf/baskets/creation -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/etf/baskets/redemption -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/etf/baskets/:id/approve -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/etf/baskets/:id/settle -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/etf/inav -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/etf/reconcile -H "Content-Type: application/json" -d '{}'
+
+# Unbanked/Underbanked
+curl -X POST http://localhost:3000/api/v1/institutional/unbanked/profiles -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/unbanked/verify -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/unbanked/corridors -H "Content-Type: application/json" -d '{}'
+curl -X POST http://localhost:3000/api/v1/institutional/unbanked/remittances -H "Content-Type: application/json" -d '{}'
+curl http://localhost:3000/api/v1/institutional/unbanked/balance/:userId
+```
+
 ## Installation
 
 ### Prerequisites
@@ -759,8 +1112,8 @@ curl -X POST http://localhost:3000/api/v1/institutional/dlq/:id/reprocess
 ### Quick Start
 
 ```bash
-git clone https://github.com/pavondunbar/Blockchain-Custody-Infrastructure.git
-cd Blockchain-Custody-Infrastructure
+git clone https://github.com/pavondunbar/Institutional-Web3-Infrastructure.git
+cd Institutional-Web3-Infrastructure
 
 docker compose up -d
 npm install
@@ -787,7 +1140,7 @@ curl http://localhost:3000/metrics
 ## Testing
 
 ```bash
-npm test              # 39 tests across 3 suites
+npm test              # 64 tests across 4 suites
 npx jest --coverage   # With coverage report
 ```
 
@@ -795,6 +1148,7 @@ Test suites:
 - **Ledger service** — balanced posting, hash chain, idempotency, reversals, double-spend prevention
 - **Wallet service** — creation, nonce allocation, reorg handling, concurrency
 - **Institutional services** — key management, settlement, treasury, monitoring, lending, FX, privacy, infrastructure, trust domains, asset lifecycle, vendor risk
+- **Integration tests** — end-to-end API flows covering custody, clearing, stablecoin, DeFi, bonds, ETF, funds, unbanked, disaster recovery, and zero-trust
 
 ## Configuration
 
@@ -806,13 +1160,24 @@ Test suites:
 | `PG_USER` | `app_writer` | DB user (least-privilege) |
 | `PG_PASSWORD` | `password` | DB password |
 | `PG_POOL_MAX` | `20` | Connection pool size |
+| `PG_SSL` | `false` | Enable PostgreSQL SSL connections |
+| `PG_SSL_REJECT_UNAUTHORIZED` | `true` | Reject unauthorized SSL certificates |
+| `PG_SSL_CA_PATH` | *(empty)* | Path to PostgreSQL CA certificate |
 | `REDIS_HOST` | `localhost` | Redis host |
 | `REDIS_PORT` | `6379` | Redis port |
+| `REDIS_PASSWORD` | *(none)* | Redis password (optional) |
 | `KAFKA_BROKERS` | `localhost:9092` | Kafka brokers |
+| `KAFKA_CLIENT_ID` | `tradfi-web3` | Kafka client identifier |
 | `ETH_RPC_URL` | `http://localhost:8545` | Ethereum RPC |
+| `ETH_CHAIN_ID` | `1` | Ethereum chain ID |
 | `ETH_CONFIRMATIONS` | `12` | Finality threshold |
 | `PORT` | `3000` | API port |
 | `LOG_LEVEL` | `info` | Pino log level |
+| `TLS_ENABLED` | `false` | Enable HTTPS/TLS |
+| `TLS_CERT_PATH` | `/etc/certs/server.crt` | TLS certificate path |
+| `TLS_KEY_PATH` | `/etc/certs/server.key` | TLS private key path |
+| `TLS_CA_PATH` | `/etc/certs/ca.crt` | TLS CA certificate path |
+| `MTLS_ENABLED` | `false` | Enable mutual TLS (client cert required) |
 
 ## Project Structure
 
@@ -825,7 +1190,10 @@ src/
 │   │   ├── 001_ledger_schema.sql          # Core ledger with triggers
 │   │   ├── 002_tokenization_schema.sql    # Token/asset tables
 │   │   ├── 003_institutional_controls.sql # IAM, governance, risk, compliance, key mgmt
-│   │   └── 004_systemic_gaps.sql          # DLQ, decimal precision, lending, FX, state machines
+│   │   ├── 004_systemic_gaps.sql          # DLQ, decimal precision, lending, FX, state machines
+│   │   ├── 005_disaster_recovery.sql      # Backup, restore, failover tables
+│   │   ├── 006_database_hardening.sql     # SSL enforcement, RLS, least-privilege roles
+│   │   └── 007_domain_extensions.sql      # Custody, RWA, CCP, stablecoin, DeFi, ETF, bonds, funds, unbanked
 │   ├── connection.ts                      # Pool + serializable transaction helper
 │   ├── migrate.ts                         # Migration runner
 │   ├── ledger-service.ts                  # Double-entry posting engine
@@ -847,20 +1215,25 @@ src/
 ├── security/
 │   ├── auth-service.ts                    # IAM, RBAC, MFA, sessions, API keys
 │   ├── audit-service.ts                   # Append-only audit trail
-│   └── encryption-service.ts             # AES-256-GCM field encryption
+│   ├── encryption-service.ts             # AES-256-GCM field encryption
+│   └── zero-trust.ts                     # mTLS, request signing, IP allowlist, service identity
 ├── risk/
 │   ├── risk-service.ts                    # Velocity/concentration/exposure policies
 │   └── circuit-breaker.ts                # Circuit breakers + kill switches
 ├── compliance/
-│   └── aml-service.ts                    # OFAC screening, Travel Rule, SAR
+│   ├── aml-service.ts                    # OFAC screening, Travel Rule, SAR
+│   └── onchain-compliance-service.ts     # Transaction graph analysis, jurisdiction rules, reporting
 ├── governance/
 │   └── approval-service.ts              # Four-eyes, M-of-N, timelocks
 ├── key-management/
-│   └── key-service.ts                   # HSM/MPC/KMS signing, rotation, sharding
+│   ├── key-service.ts                   # HSM/MPC/KMS signing, rotation, sharding
+│   └── key-ceremony-service.ts          # Multi-participant ceremony orchestration
 ├── settlement/
-│   └── settlement-service.ts            # DvP/PvP/netting, atomic execution
+│   ├── settlement-service.ts            # DvP/PvP/netting, atomic execution
+│   └── dvp-settlement-service.ts        # Partial settlement, buy-in procedures
 ├── lending/
-│   └── lending-service.ts               # Loans, margin, liquidation
+│   ├── lending-service.ts               # Loans, margin, liquidation
+│   └── lending-extensions-service.ts    # Haircuts, collateral baskets, syndication, rate curves
 ├── fx/
 │   └── fx-service.ts                    # FX rates, locking, PvP conversion
 ├── oracle/
@@ -886,6 +1259,28 @@ src/
 │   └── privacy-service.ts             # ZK proofs, selective disclosure
 ├── infrastructure/
 │   └── infrastructure-service.ts       # Node health, load balancing, failover
+├── custody/
+│   └── crypto-custody-service.ts       # Multi-sig policies, whitelist, cold storage
+├── rwa/
+│   └── rwa-tokenization-service.ts     # Investor accreditation, asset verification
+├── clearing/
+│   └── ccp-clearinghouse-service.ts    # Membership, margin, default waterfall, stress testing
+├── stablecoin/
+│   └── stablecoin-service.ts           # Mint/redeem, peg monitoring, yield distribution
+├── defi/
+│   └── permissioned-defi-service.ts    # Verifiable credentials, pool access policies
+├── bond/
+│   └── digital-bond-service.ts         # Bond terms, coupons, accrued interest, credit events
+├── etf/
+│   └── bitcoin-etf-service.ts          # UTXO management, baskets, iNAV, reconciliation
+├── fund/
+│   └── tokenized-fund-service.ts       # Windows, orders, performance fees, statements
+├── unbanked/
+│   └── unbanked-infra-service.ts       # Tiered KYC, remittances, USSD, corridors
+├── disaster-recovery/
+│   └── disaster-recovery-service.ts    # Backup, restore, verification, RPO/RTO
+├── testing/
+│   └── integration-tests.test.ts       # End-to-end integration test suite (25 tests)
 ├── institutional/
 │   └── institutional-services.test.ts  # Institutional module tests
 └── api/
